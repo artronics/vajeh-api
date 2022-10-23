@@ -1,0 +1,29 @@
+name: 'Deploy'
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache terraform
+        uses: actions/cache@v3
+        with:
+          key: terraform-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+          path: terraform/.terraform
+
+      - name: Deploy dev
+        uses: artronics/terraform-flow-action@v1
+        with:
+          workspace: dev
+          path: terraform
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+

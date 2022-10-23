@@ -1,0 +1,28 @@
+name: 'Pull Request'
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  deploy-pr:
+    name: Deploy PR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache terraform
+        uses: actions/cache@v3
+        with:
+          key: terraform-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+          path: terraform/.terraform
+
+      - name: Deploy PR
+        uses: artronics/terraform-flow-action@v1
+        with:
+          workspace: pr${{ github.event.pull_request.number }}
+          path: terraform
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+

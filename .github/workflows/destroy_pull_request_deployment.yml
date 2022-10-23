@@ -1,0 +1,28 @@
+name: Destroy PR deployment
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  destroy-pr-deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Cache terraform
+        uses: actions/cache@v3
+        with:
+          key: terraform-${{ hashFiles('terraform/.terraform.lock.hcl') }}
+          path: terraform/.terraform
+
+      - name: Destroy PR deployment
+        uses: artronics/terraform-flow-action@v1
+        with:
+          workspace: pr${{ github.event.pull_request.number }}
+          path: terraform
+          destroy: true
+          destroy_workspace: true
+          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
