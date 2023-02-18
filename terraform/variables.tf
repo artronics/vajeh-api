@@ -1,15 +1,14 @@
-locals {
-  project = "vajeh"
-  tier    = "api"
+variable "project" {
+  type        = string
+  description = "Project name. It should be the same as repo name. The value comes from PROJECT in .env file."
 }
 
-locals {
-  environment = terraform.workspace
-  service = "api"
-  name_prefix = "${local.project}-${local.service}-${local.environment}"
+variable "workspace_tag" {
+  type        = string
+  description = "The tag value for the \"Workspace\". If it's user workspace then the pattern must be \"user_<short_code>. If it's PR then it must be pr_<pr_no>. Otherwise it's either \"dev\" or \"prod\""
 }
 
-locals {
-  root_domain_name = "vajeh.artronics.me.uk"
-  domain_name = "${local.environment}.${local.service}.${local.root_domain_name}"
+variable "account_zone" {
+  type        = string
+  description = "It's the root zone name of the account"
 }

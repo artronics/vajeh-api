@@ -1,11 +1,10 @@
-include .env
+# Add logic to tasks.py. This file is only for ease of running when using IDEs and editors
 
-aws_cred := -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) -e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY)
-tf := docker run --rm -it $(aws_cred) -v $(shell pwd):/app
+init:
+	invoke init
 
-ws = jaho
+plan:
+	invoke plan
 
-terraform-deploy:
-	  $(tf) terraform-flow --path=/app/terraform --workspace=$(ws) --options="" --dryrun=false --destroy=false --destroy-workspace=false
-terraform-destroy:
-	  $(tf) terraform-flow --path=/app/terraform --workspace=$(ws) --options="" --dryrun=false --destroy=true --destroy-workspace=false
+apply:
+	invoke apply
