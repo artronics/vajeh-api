@@ -25,12 +25,13 @@ kvm = read_kvm()
 
 
 def set_default():
-    defs = [("TERRAFORM_DIR", "terraform")]
+    defs = [("TERRAFORM_DIR", "terraform"), ("ENVIRONMENT", "dev")]
     for k, v in defs:
         if k not in kvm:
             kvm[k] = v
 
 
+set_default()
 # .env kvm will overwrite environment variables
 os.environ.update(kvm)
 
