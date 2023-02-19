@@ -1,5 +1,6 @@
 import os
 import subprocess
+from pathlib import Path
 
 from invoke import task
 
@@ -7,23 +8,36 @@ ENV_FILE = ".env"
 PERSISTENT_WORKSPACES = ["dev", "prod"]
 ROOT_ZONE = "vajeh.co.uk"
 
+default_kvm = {
+    "PROJECT": os.getenv("PROJECT", Path(os.getcwd()).stem),
+    "ENVIRONMENT": os.getenv("ENVIRONMENT", "dev"),
+    "WORKSPACE": os.getenv("WORKSPACE", "dev"),
+    "TERRAFORM_DIR": os.getenv("TERRAFORM_DIR", "terraform"),
+    "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", ""),
+    "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", ""),
+}
 
-def read_kvm():
+
+def update_kvm():
     try:
         with open(ENV_FILE) as f:
             kv = {k.strip(): v.strip() for k, v in (line.split('=') for line in f if line.strip())}
-            return kv
     except ValueError:
         print("Parse error. Format file like key=value")
         exit(1)
     except FileNotFoundError:
-        print("Environment file not found. Create .env file by renaming example.env file")
-        exit(1)
+        print("Environment file not found. Using only default values and environment variables.")
+        return default_kvm
+    return default_kvm | kv
 
 
-kvm = read_kvm()
+kvm = update_kvm()
 # .env kvm will overwrite environment variables
 os.environ.update(kvm)
+# DO NOT print the whole kvm. There are secrets in there
+print("Settings:")
+print(
+    f"PROJECT: {kvm['PROJECT']}\nENVIRONMENT: {kvm['ENVIRONMENT']}\nWORKSPACE: {kvm['WORKSPACE']}\nTERRAFORM_DIR: {kvm['TERRAFORM_DIR']}\n")
 
 ACCOUNT = "ptl" if kvm['ENVIRONMENT'] != "prod" else "prod"
 
