@@ -15,6 +15,7 @@ jobs:
 
       - name: Destroy PR
         env:
+          PROJECT: vajeh-api
           WORKSPACE: pr-${{ github.event.pull_request.number }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
