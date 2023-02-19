@@ -26,7 +26,7 @@ def update_kvm():
         exit(1)
     except FileNotFoundError:
         print("Environment file not found. Using only default values and environment variables.")
-        return
+        return default_kvm
     return default_kvm | kv
 
 
