@@ -8,6 +8,7 @@ jobs:
   deploy-pr:
     name: Deploy PR
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -18,11 +19,23 @@ jobs:
           key: terraform-${{ hashFiles('terraform/.terraform.lock.hcl') }}
           path: terraform/.terraform
 
+      - name: Install invoke
+        run: pip install invoke
+
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          PROJECT=vajeh-api
+          ENVIRONMENT=dev
+          WORKSPACE=pr${{ github.event.pull_request.number }}
+          TERRAFORM_DIR=terraform
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+          EOF
+
       - name: Deploy PR
-        uses: artronics/terraform-flow-action@v1
-        with:
-          workspace: pr${{ github.event.pull_request.number }}
-          path: terraform
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          invoke init
+          invoke apply
 
