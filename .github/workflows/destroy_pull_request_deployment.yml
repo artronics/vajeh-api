@@ -16,13 +16,23 @@ jobs:
           key: terraform-${{ hashFiles('terraform/.terraform.lock.hcl') }}
           path: terraform/.terraform
 
-      - name: Destroy PR deployment
-        uses: artronics/terraform-flow-action@v1
-        with:
-          workspace: pr${{ github.event.pull_request.number }}
-          path: terraform
-          destroy: true
-          destroy_workspace: true
-          aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      - name: Install invoke
+        run: pip install invoke
+
+      - name: Create .env file
+        run: |
+          cat << EOF > .env
+          PROJECT=vajeh-api
+          ENVIRONMENT=dev
+          WORKSPACE=pr${{ github.event.pull_request.number }}
+          TERRAFORM_DIR=terraform
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+          EOF
+
+      - name: Destroy PR
+        run: |
+          invoke init
+          invoke destroy --no-dryrun
 
