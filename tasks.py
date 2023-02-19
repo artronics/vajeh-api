@@ -11,6 +11,7 @@ ROOT_ZONE = "vajeh.co.uk"
 default_kvm = {
     "PROJECT": os.getenv("PROJECT", Path(os.getcwd()).stem),
     "ENVIRONMENT": os.getenv("ENVIRONMENT", "dev"),
+    "WORKSPACE": os.getenv("WORKSPACE", "dev"),
     "TERRAFORM_DIR": os.getenv("TERRAFORM_DIR", "terraform"),
     "AWS_ACCESS_KEY_ID": os.getenv("AWS_ACCESS_KEY_ID", ""),
     "AWS_SECRET_ACCESS_KEY": os.getenv("AWS_SECRET_ACCESS_KEY", ""),
