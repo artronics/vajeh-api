@@ -11,6 +11,12 @@ plan:
 apply:
 	invoke apply
 
+destroy-plan:
+	invoke destroy
+
+destroy:
+	invoke destroy --no-dryrun
+
 output:
 	invoke output
 
@@ -19,5 +25,6 @@ render-spec: | $(BUILDDIR)
 
 clean:
 	rm -rf build terraform/.terraform
+
 $(BUILDDIR):
 	mkdir $(BUILDDIR)
