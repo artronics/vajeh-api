@@ -36,6 +36,6 @@ jobs:
           EOF
 
       - name: Deploy dev
-        run: invoke apply
-
-
+        run: |
+          invoke init
+          invoke apply
