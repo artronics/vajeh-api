@@ -52,8 +52,8 @@ TERRAFORM_STATE_S3 = get_state_s3_name()
 
 def get_tf_vars(ws):
     workspace_tag = ws
-    if ws not in PERSISTENT_WORKSPACES and not ws.startswith("pr_"):
-        workspace_tag = f"user_{ws}"
+    if ws not in PERSISTENT_WORKSPACES and not ws.startswith("pr-"):
+        workspace_tag = f"user-{ws}"
 
     account_zone = f"{ACCOUNT}.{ROOT_ZONE}"
 
