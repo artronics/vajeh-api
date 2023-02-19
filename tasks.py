@@ -116,3 +116,9 @@ def destroy(c, dir=kvm["TERRAFORM_DIR"], dryrun=True):
         c.run(f"terraform -chdir={dir} plan {tf_vars} -destroy", in_stream=False)
     else:
         c.run(f"terraform -chdir={dir} destroy {tf_vars} -auto-approve", in_stream=False)
+
+
+@task(workspace)
+def output(c, dir=kvm["TERRAFORM_DIR"]):
+    c.run("mkdir -p build", in_stream=False)
+    c.run(f"terraform -chdir={dir} output -json", in_stream=False)
