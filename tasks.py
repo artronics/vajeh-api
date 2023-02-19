@@ -24,6 +24,8 @@ def update_kvm():
     except ValueError:
         print("Parse error. Format file like key=value")
         exit(1)
+    except FileNotFoundError:
+        print("Environment file not found. Using only default values and environment variables.")
     return default_kvm | kv
 
 
