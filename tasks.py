@@ -78,6 +78,14 @@ def create_workspace(_dir, ws):
     subprocess.run(["terraform", f"-chdir={_dir}", "workspace", "new", ws])
 
 
+def delete_workspace(_dir, ws):
+    (_, current) = get_terraform_workspaces(_dir)
+    if ws == "default" or current == "default":
+        return
+    switch_workspace(_dir, "default")
+    subprocess.run(["terraform", f"-chdir={_dir}", "workspace", "delete", ws])
+
+
 @task(help={"dir": "Directory where terraform files are located. Set default via TERRAFORM_DIR in env var or .env file",
             "ws": "Terraform workspace. Set default via WORKSPACE in env var or .env file"})
 def workspace(c, dir=kvm["TERRAFORM_DIR"], ws=kvm["WORKSPACE"]):
@@ -116,6 +124,7 @@ def destroy(c, dir=kvm["TERRAFORM_DIR"], dryrun=True):
         c.run(f"terraform -chdir={dir} plan {tf_vars} -destroy", in_stream=False)
     else:
         c.run(f"terraform -chdir={dir} destroy {tf_vars} -auto-approve", in_stream=False)
+        delete_workspace(dir, ws)
 
 
 @task(workspace)
