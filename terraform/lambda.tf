@@ -15,7 +15,7 @@ data "archive_file" "python_lambda_package" {
 }
 
 resource "aws_iam_role" "lambda_exec" {
-  name = "serverless_lambda"
+  name = "${local.prefix}-serverless_lambda"
 
   assume_role_policy = jsonencode({
     Version   = "2012-10-17"
