@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     env:
-      TF_PLUGIN_CACHE_DIR: "${GITHUB_WORKSPACE}/plugin-cache"
+      TF_PLUGIN_CACHE_DIR: "${{ env.GITHUB_WORKSPACE }}/plugin-cache"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
