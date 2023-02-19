@@ -9,6 +9,8 @@ jobs:
     name: Deploy PR
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      TF_PLUGIN_CACHE_DIR: "${GITHUB_WORKSPACE}/plugin-cache"
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -17,13 +19,16 @@ jobs:
         uses: actions/cache@v3
         with:
           key: terraform-${{ hashFiles('terraform/.terraform.lock.hcl') }}
-          path: terraform/.terraform
+          path: "${{ env.TF_PLUGIN_CACHE_DIR }}"
 
       - name: Install invoke
         run: pip install invoke
 
       - name: Create .env file
         run: |
+          echo "cache dir"
+          echo $TF_PLUGIN_CACHE_DIR
+
           cat << EOF > .env
           PROJECT=vajeh-api
           ENVIRONMENT=dev
@@ -38,4 +43,7 @@ jobs:
         run: |
           invoke init
           invoke apply
+
+      - name: check
+        run: ls $TF_PLUGIN_CACHE_DIR
 
