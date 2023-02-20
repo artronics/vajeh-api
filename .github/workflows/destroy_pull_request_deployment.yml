@@ -7,6 +7,9 @@ jobs:
   destroy-pr-deployment:
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      PROJECT: vajeh-api
+      WORKSPACE: pr-${{ github.event.pull_request.number }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -14,13 +17,18 @@ jobs:
       - name: Install invoke
         run: pip install invoke
 
-      - name: Destroy PR
+      - name: Deploy PR - init
         env:
-          PROJECT: vajeh-api
-          WORKSPACE: pr-${{ github.event.pull_request.number }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          invoke init
-          invoke destroy --no-dryrun
+        run: invoke init
 
+      - name: Deploy PR - destroy
+        uses: nick-fields/retry@v2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          timeout_minutes: 10
+          max_attempts: 2
+          command: invoke destroy --no-dryrun

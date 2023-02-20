@@ -9,6 +9,9 @@ jobs:
     name: Deploy PR
     runs-on: ubuntu-latest
     environment: dev
+    env:
+      PROJECT: vajeh-api
+      WORKSPACE: pr-${{ github.event.pull_request.number }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -16,12 +19,18 @@ jobs:
       - name: Install invoke
         run: pip install invoke
 
-      - name: Deploy PR
+      - name: Deploy PR - init
         env:
-          PROJECT: vajeh-api
-          WORKSPACE: pr-${{ github.event.pull_request.number }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        run: |
-          invoke init
-          invoke apply
+        run: invoke init
+
+      - name: Deploy PR - apply
+        uses: nick-fields/retry@v2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        with:
+          timeout_minutes: 10
+          max_attempts: 2
+          command: invoke apply
