@@ -20,6 +20,9 @@ destroy:
 output:
 	invoke output
 
+lock-provider:
+	invoke lock-provider
+
 render-spec: | $(BUILDDIR)
 	invoke output | jq '.oas.value' | yq -P > build/vajeh-api.yml
 
