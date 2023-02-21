@@ -43,8 +43,9 @@ print(
     f"PROJECT: {config['PROJECT']}\nENVIRONMENT: {config['ENVIRONMENT']}\n"
     f"WORKSPACE: {config['WORKSPACE']}\nTERRAFORM_DIR: {config['TERRAFORM_DIR']}\n")
 
-ACCOUNT = "ptl" if config['ENVIRONMENT'] != "prod" else "prod"
-TERRAFORM_STATE_S3 = f"{config['PROJECT']}-{ACCOUNT}-terraform-state"
+aws_account = "ptl" if config['ENVIRONMENT'] != "prod" else "prod"
+tf_state_bucket = f"{config['PROJECT']}-{aws_account}-terraform-state"
+tf_dir = config["TERRAFORM_DIR"]
 
 
 def parse_workspace_list(output):
@@ -60,34 +61,34 @@ def parse_workspace_list(output):
     return workspaces, current_ws
 
 
-def get_terraform_workspaces(_dir) -> (list[str], str):
-    s = subprocess.check_output(["terraform", f"-chdir={_dir}", "workspace", "list"])
+def get_terraform_workspaces() -> (list[str], str):
+    s = subprocess.check_output(["terraform", f"-chdir={tf_dir}", "workspace", "list"])
     return parse_workspace_list(s.decode("utf-8"))
 
 
-def switch_workspace(_dir, ws):
-    subprocess.run(["terraform", f"-chdir={_dir}", "workspace", "select", ws])
+def switch_workspace(ws):
+    subprocess.run(["terraform", f"-chdir={tf_dir}", "workspace", "select", ws])
 
 
-def create_workspace(_dir, ws):
-    subprocess.run(["terraform", f"-chdir={_dir}", "workspace", "new", ws])
+def create_workspace(ws):
+    subprocess.run(["terraform", f"-chdir={tf_dir}", "workspace", "new", ws])
 
 
-def delete_workspace(_dir, ws):
-    (_, current) = get_terraform_workspaces(_dir)
+def delete_workspace(ws):
+    (_, current) = get_terraform_workspaces()
     if ws == "default" or current == "default":
         return
-    switch_workspace(_dir, "default")
-    subprocess.run(["terraform", f"-chdir={_dir}", "workspace", "delete", ws])
+    switch_workspace("default")
+    subprocess.run(["terraform", f"-chdir={tf_dir}", "workspace", "delete", ws])
 
 
-def get_tf_vars(_dir):
-    (_, ws) = get_terraform_workspaces(_dir)
+def get_tf_vars():
+    (_, ws) = get_terraform_workspaces()
     workspace_tag = ws
     if ws not in PERSISTENT_WORKSPACES and not ws.startswith("pr-"):
         workspace_tag = f"user-{ws}"
 
-    account_zone = f"{ACCOUNT}.{ROOT_ZONE}"
+    account_zone = f"{aws_account}.{ROOT_ZONE}"
 
     all_vars = {"project": config["PROJECT"], "workspace_tag": workspace_tag, "account_zone": account_zone}
 
@@ -98,55 +99,53 @@ def get_tf_vars(_dir):
     return tf_vars
 
 
-@task(help={"dir": "Directory where terraform files are located. Set default via TERRAFORM_DIR in env var or .env file",
-            "ws": "Terraform workspace. Set default via WORKSPACE in env var or .env file"})
-def workspace(c, dir=config["TERRAFORM_DIR"], ws=config["WORKSPACE"]):
-    (wss, current_ws) = get_terraform_workspaces(dir)
+@task(help={"ws": "Terraform workspace. Set default via WORKSPACE in env var or .env file"})
+def workspace(c, ws=config["WORKSPACE"]):
+    (wss, current_ws) = get_terraform_workspaces()
     if ws not in wss:
-        create_workspace(dir, ws)
+        create_workspace(ws)
     elif ws != current_ws:
-        switch_workspace(dir, ws)
+        switch_workspace(ws)
 
 
-@task(help={"dir": "Directory where terraform files are located. "
-                   "Set default via TERRAFORM_DIR in env var or .env file"})
-def init(c, dir=config["TERRAFORM_DIR"]):
-    c.run(f"terraform -chdir={dir} init -backend-config=\"bucket={TERRAFORM_STATE_S3}\"", in_stream=False)
+@task()
+def init(c):
+    c.run(f"terraform -chdir={tf_dir} init -backend-config=\"bucket={tf_state_bucket}\"", in_stream=False)
     print("DO NOT FORGET to run `provider-lock` task if, you added new provider/plugin.")
 
 
 @task(workspace)
-def plan(c, dir=config["TERRAFORM_DIR"]):
-    tf_vars = get_tf_vars(dir)
-    c.run(f"terraform -chdir={dir} plan {tf_vars}", in_stream=False)
+def plan(c):
+    tf_vars = get_tf_vars()
+    c.run(f"terraform -chdir={tf_dir} plan {tf_vars}", in_stream=False)
 
 
 @task(workspace)
-def apply(c, dir=config["TERRAFORM_DIR"]):
-    tf_vars = get_tf_vars(dir)
-    c.run(f"terraform -chdir={dir} apply {tf_vars} -auto-approve", in_stream=False)
+def apply(c):
+    tf_vars = get_tf_vars()
+    c.run(f"terraform -chdir={tf_dir} apply {tf_vars} -auto-approve", in_stream=False)
 
 
 @task(workspace)
-def destroy(c, dir=config["TERRAFORM_DIR"], dryrun=True):
-    (_, ws) = get_terraform_workspaces(dir)
-    tf_vars = get_tf_vars(dir)
+def destroy(c, dryrun=True):
+    (_, ws) = get_terraform_workspaces()
+    tf_vars = get_tf_vars()
     if dryrun:
-        c.run(f"terraform -chdir={dir} plan {tf_vars} -destroy", in_stream=False)
+        c.run(f"terraform -chdir={tf_dir} plan {tf_vars} -destroy", in_stream=False)
     else:
-        c.run(f"terraform -chdir={dir} destroy {tf_vars} -auto-approve", in_stream=False)
-        delete_workspace(dir, ws)
+        c.run(f"terraform -chdir={tf_dir} destroy {tf_vars} -auto-approve", in_stream=False)
+        delete_workspace(ws)
 
 
 @task(workspace)
-def output(c, dir=config["TERRAFORM_DIR"]):
+def output(c):
     c.run("mkdir -p build", in_stream=False)
-    c.run(f"terraform -chdir={dir} output -json", in_stream=False)
+    c.run(f"terraform -chdir={tf_dir} output -json", in_stream=False)
 
 
 @task(workspace)
-def lock_provider(c, dir=config["TERRAFORM_DIR"]):
+def lock_provider(c):
     print("This will take a while. Be patient!")
-    c.run(f"terraform -chdir={dir} providers lock "
+    c.run(f"terraform -chdir={tf_dir} providers lock "
           f"-platform=darwin_arm64 -platform=darwin_amd64 -platform=linux_amd64 -platform=windows_amd64",
           in_stream=False)
