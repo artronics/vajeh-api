@@ -1,6 +1,7 @@
 .idea
 .env
 .venv
+project.private.env.json
 build
 http/http-client.private.*
 **/.terraform
