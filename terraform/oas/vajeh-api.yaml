@@ -16,9 +16,11 @@ paths:
         '200':
           description: A paged array of pets
           content:
-            text/plain:
+            application/json:
               schema:
-                type: string
+                type: object
+      security:
+        - auth: [ ]
       x-amazon-apigateway-integration:
         uri: "${lambda_identity_arn}"
         passthroughBehavior: "when_no_match"
@@ -26,3 +28,17 @@ paths:
         httpMethod: "POST"
         timeoutInMillis: 30000
         type: "AWS_PROXY"
+
+components:
+  securitySchemes:
+    auth:
+      type: "oauth2"
+      flows: { }
+      x-amazon-apigateway-authorizer:
+        identitySource: "$request.header.Authorization"
+        jwtConfiguration:
+          audience:
+            - "6i0ibvosghai5ldp9a2hr2997u"
+          issuer: "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_ds6R5zTCW"
+        type: "jwt"
+x-amazon-apigateway-importexport-version: "1.0"

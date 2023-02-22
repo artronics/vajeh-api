@@ -1,1 +1,28 @@
+POST https://vajeh-auth-{{workspace}}-auth-domain.auth.eu-west-2.amazoncognito.com/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+Accept:  application/json;charset=UTF-8
+
+grant_type=authorization_code&code={{auth_code}}&redirect_uri=https://oauth.pstmn.io/v1/callback&client_id={{client_id}}&client_secret=""
+
+> {%
+  // This doesn't work. For some reason the parse fails even though response is valid json
+  let b = JSON.parse(response.body)
+  let access_token = b["access_token"]
+
+  client.global.set("access_token", access_token)
+%}
+
+###
 GET https://api.{{workspace}}.{{account}}.vajeh.co.uk/pets
+Authorization: Bearer {{access_token}}
+
+> {%
+
+  let a = JSON.parse(response.body)
+  client.test("hello", function () {
+    // let a = response.body.message
+    client.assert(a["message"] == "hello api", "Cannot find 'headers' option in response");
+  })
+%}
+
+
