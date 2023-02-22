@@ -10,7 +10,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: dev
     env:
-      PROJECT: vajeh-api
       WORKSPACE: pr-${{ github.event.pull_request.number }}
     steps:
       - name: Checkout

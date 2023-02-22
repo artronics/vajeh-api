@@ -13,6 +13,21 @@ grant_type=authorization_code&code={{auth_code}}&redirect_uri=https://oauth.pstm
 %}
 
 ###
+POST https://vajeh-auth-{{workspace}}-auth-domain.auth.eu-west-2.amazoncognito.com/oauth2/token
+Content-Type: application/x-www-form-urlencoded
+Authorization: Basic {{client_id}} {{client_secret}}
+
+grant_type=client_credentials&client_id={{client_id}}&scope=user-server-domain/read
+
+> {%
+  // This doesn't work. For some reason the parse fails even though response is valid json
+  b = JSON.parse(response.body);
+  access_token = b["access_token"];
+
+  client.global.set("access_token", access_token)
+%}
+
+###
 GET https://api.{{workspace}}.{{account}}.vajeh.co.uk/pets
 Authorization: Bearer {{access_token}}
 
@@ -26,3 +41,6 @@ Authorization: Bearer {{access_token}}
 %}
 
 
+###
+GET https://api.{{workspace}}.{{account}}.vajeh.co.uk/client-cred
+Authorization: Bearer {{access_token}}
