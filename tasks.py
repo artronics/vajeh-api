@@ -40,11 +40,15 @@ def load_project_conf():
 config = load_project_conf()
 # config will overwrite environment variables
 os.environ.update(config)
-# DO NOT print the whole config. There are secrets in there
-print("Settings:")
-print(
-    f"PROJECT: {config['PROJECT']}\nENVIRONMENT: {config['ENVIRONMENT']}\n"
-    f"WORKSPACE: {config['WORKSPACE']}\nTERRAFORM_DIR: {config['TERRAFORM_DIR']}\n")
+
+
+def print_settings():
+    # DO NOT print the whole config. There are secrets in there
+    print("Settings:")
+    print(
+        f"PROJECT: {config['PROJECT']}\nENVIRONMENT: {config['ENVIRONMENT']}\n"
+        f"WORKSPACE: {config['WORKSPACE']}\nTERRAFORM_DIR: {config['TERRAFORM_DIR']}\n")
+
 
 aws_account = "ptl" if config['ENVIRONMENT'] != "prod" else "prod"
 tf_state_bucket = f"{config['PROJECT']}-{aws_account}-terraform-state"
@@ -119,18 +123,21 @@ def init(c):
 
 @task(workspace)
 def plan(c):
+    print_settings()
     tf_vars = get_tf_vars()
     c.run(f"terraform -chdir={tf_dir} plan {tf_vars}", in_stream=False)
 
 
 @task(workspace)
 def apply(c):
+    print_settings()
     tf_vars = get_tf_vars()
     c.run(f"terraform -chdir={tf_dir} apply {tf_vars} -auto-approve", in_stream=False)
 
 
 @task(workspace)
 def destroy(c, dryrun=True):
+    print_settings()
     (_, ws) = get_terraform_workspaces()
     tf_vars = get_tf_vars()
     if dryrun:

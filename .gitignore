@@ -3,5 +3,5 @@
 .venv
 project.private.env.json
 build
-http/http-client.private.*
+http/*private*
 **/.terraform

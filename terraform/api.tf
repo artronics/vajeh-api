@@ -3,6 +3,9 @@ locals {
     api_url             = local.api_domain_name
     region              = data.aws_region.current.name
     lambda_identity_arn = aws_lambda_function.app.arn
+    issuer              = local.issuer
+    scopes              = join(", ", local.scopes)
+    test_audience       = local.test_audience
   }
 }
 

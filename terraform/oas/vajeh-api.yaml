@@ -1,8 +1,8 @@
-openapi: 3.0.3
+openapi: "3.0.3"
 info:
   title: Vajeh API
   description: Vajeh API
-  version: 1.0.0
+  version: "1.0.0"
 servers:
   - url: "https://${api_url}"
 paths:
@@ -20,7 +20,7 @@ paths:
               schema:
                 type: object
       security:
-        - auth: [ ]
+        - auth: [ "${scopes}" ]
       x-amazon-apigateway-integration:
         uri: "${lambda_identity_arn}"
         passthroughBehavior: "when_no_match"
@@ -38,7 +38,7 @@ components:
         identitySource: "$request.header.Authorization"
         jwtConfiguration:
           audience:
-            - "6i0ibvosghai5ldp9a2hr2997u"
-          issuer: "https://cognito-idp.eu-west-2.amazonaws.com/eu-west-2_ds6R5zTCW"
+            - "${test_audience}"
+          issuer: "${issuer}"
         type: "jwt"
 x-amazon-apigateway-importexport-version: "1.0"
