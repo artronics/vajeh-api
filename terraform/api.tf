@@ -16,7 +16,12 @@ resource "aws_apigatewayv2_api" "vajeh_api" {
 }
 
 output "oas" {
-  value = aws_apigatewayv2_api.vajeh_api.body //templatefile("./oas/vajeh-api.yaml", local.oas_vars)
+  value = aws_apigatewayv2_api.vajeh_api.body
+}
+
+resource "local_file" "oas_file" {
+  filename = "${local.output_dir}/${local.prefix}-oas.yaml"
+  content  = aws_apigatewayv2_api.vajeh_api.body
 }
 
 resource "aws_apigatewayv2_stage" "default_stage" {

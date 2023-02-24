@@ -15,7 +15,8 @@ terraform {
 data "aws_region" "current" {}
 
 locals {
-  tier = "api"
+  tier       = "api"
+  output_dir = "out"
 }
 
 locals {
@@ -30,7 +31,7 @@ data "aws_route53_zone" "account_zone" {
 }
 
 locals {
-  zone_id         = data.aws_route53_zone.account_zone.zone_id
+  zone_id = data.aws_route53_zone.account_zone.zone_id
 }
 
 provider "aws" {
