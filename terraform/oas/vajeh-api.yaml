@@ -20,7 +20,7 @@ paths:
               schema:
                 type: object
       security:
-        - auth: [ "${scopes}" ]
+        - auth: [ ${ auth_scopes } ]
       x-amazon-apigateway-integration:
         uri: "${lambda_identity_arn}"
         passthroughBehavior: "when_no_match"
@@ -37,8 +37,7 @@ components:
       x-amazon-apigateway-authorizer:
         identitySource: "$request.header.Authorization"
         jwtConfiguration:
-          audience:
-            - "${test_audience}"
-          issuer: "${issuer}"
+          audience: [ ${ auth_audience } ]
+          issuer: "${auth_issuer}"
         type: "jwt"
 x-amazon-apigateway-importexport-version: "1.0"

@@ -16,7 +16,7 @@ def load_project_conf():
     def get_param(k, default):
         return os.getenv(k, public_conf.get(k, default))
 
-    conf = {
+    conf = public_conf | {
         "PROJECT": get_param("PROJECT", Path(os.getcwd()).stem),
         "ENVIRONMENT": get_param("ENVIRONMENT", "dev"),
         "WORKSPACE": get_param("WORKSPACE", "dev"),
