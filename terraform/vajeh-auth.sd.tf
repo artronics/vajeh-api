@@ -1,3 +1,7 @@
+locals {
+  vajeh_auth_workspace = var.sd_vajeh_auth_workspace == "" ? var.service_dependency_workspace : var.sd_vajeh_auth_workspace
+}
+
 data "terraform_remote_state" "vajeh-auth" {
   backend = "s3"
 

@@ -2,13 +2,10 @@ POST https://vajeh-auth-{{workspace}}-auth-domain.auth.eu-west-2.amazoncognito.c
 Content-Type: application/x-www-form-urlencoded
 Accept:  application/json;charset=UTF-8
 
-grant_type=authorization_code&code={{auth_code}}&redirect_uri=https://oauth.pstmn.io/v1/callback&client_id={{client_id}}&client_secret=""
+grant_type=authorization_code&code={{auth_code}}&redirect_uri={{redirect_uri}}&client_id={{client_id}}&client_secret=
 
 > {%
-  // This doesn't work. For some reason the parse fails even though response is valid json
-  let b = JSON.parse(response.body)
-  let access_token = b["access_token"]
-
+  let access_token = response.body.access_token;
   client.global.set("access_token", access_token)
 %}
 
@@ -17,7 +14,7 @@ POST https://vajeh-auth-{{workspace}}-auth-domain.auth.eu-west-2.amazoncognito.c
 Content-Type: application/x-www-form-urlencoded
 Authorization: Basic {{client_id}} {{client_secret}}
 
-grant_type=client_credentials&client_id={{client_id}}&scope=user-server-domain/read
+grant_type=client_credentials&client_id={{client_id}}&scope=vajeh-auth-jaho-test-server/read vajeh-auth-jaho-test-server/write
 
 > {%
   // This doesn't work. For some reason the parse fails even though response is valid json
@@ -33,6 +30,7 @@ Authorization: Bearer {{access_token}}
 
 > {%
 
+  client.log(client.global.get("access_token"))
   let a = JSON.parse(response.body)
   client.test("hello", function () {
     // let a = response.body.message

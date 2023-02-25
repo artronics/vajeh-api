@@ -27,7 +27,7 @@ render-spec: | $(BUILDDIR)
 	invoke output | jq '.oas.value' | yq -P > build/vajeh-api.yml
 
 clean:
-	rm -rf build terraform/.terraform
+	rm -rf build terraform/.terraform terraform/out
 
 $(BUILDDIR):
 	mkdir $(BUILDDIR)

@@ -18,7 +18,3 @@ variable "sd_vajeh_auth_workspace" {
   description = "vajeh-auth workspace to use"
   default     = ""
 }
-
-locals {
-  vajeh_auth_workspace = var.sd_vajeh_auth_workspace == "" ? var.service_dependency_workspace : var.sd_vajeh_auth_workspace
-}
